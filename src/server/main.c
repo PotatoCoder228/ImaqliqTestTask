@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "app/server_app.h"
+#include "../../include/server/server_app.h"
 #include "../../include/common/exception_s.h"
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+#include <syslog.h>
 
 int main(int argc, char **argv) {
     exception_s *exception = new_exception();
-    if(exception == NULL){
+
+    if (exception == NULL) {
         fprintf(stderr, "%s", strerror(errno));
     }
     if (argc == 0) {
@@ -27,10 +30,6 @@ int main(int argc, char **argv) {
     }
     umask(0);
     pid_t pid = fork();
-    /*
-     * Так как по ТЗ нужно завершение процесса на SIGTERM и SIGHUP
-     * то sigaction() не нужен
-     */
     if (pid < 0) {
         throw_exception(exception, FORK_DENIED_EXCEPTION, "Не удалось создать дочерний процесс.");
         exception_destroy(exception);
@@ -39,7 +38,9 @@ int main(int argc, char **argv) {
         exception_destroy(exception);
         return EXIT_SUCCESS;
     }
-    server_start(port, exception);
     exception_destroy(exception);
+    openlog("server_logs", LOG_INFO, LOG_DAEMON);
+    server_start(port);
+    syslog(LOG_INFO, "Сервер успешно завершил работу.");
     return EXIT_SUCCESS;
 }

@@ -6,9 +6,9 @@
 #define IMAQLIQTESTTASK_SERVER_APP_H
 
 #include <stdint.h>
-#include "../../../include/common/exception_s.h"
+#include "../common/exception_s.h"
 
-enum app_exceptions {
+enum server_app_exceptions {
     PORT_IS_OCCUPIED = 0,
     ARGS_IS_UNDEFINED,
     FORK_DENIED_EXCEPTION,
@@ -16,6 +16,6 @@ enum app_exceptions {
 };
 
 
-int server_start(int64_t port, exception_s *exception);
+int server_start(int64_t port);
 
 #endif //IMAQLIQTESTTASK_SERVER_APP_H

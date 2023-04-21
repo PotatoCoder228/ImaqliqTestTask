@@ -14,21 +14,18 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "../common/exception_s.h"
-#include "../../src/server/app/server_app.h"
+#include "exception_s.h"
+#include "../server/server_app.h"
 
 
 enum conn_consts {
-    CONNECTION_TIMEOUT = 2000
-};
-
-enum conn_exceptions {
-    SOCKET_BIND_DENIED = INVALID_PORT + 1,
-    SOCKET_INIT_DENIED
+    CONNECTION_TIMEOUT = 128
 };
 
 static const char host[] = "localhost";
 
-int init_connection(int port, exception_s *exception);
+int init_server_connection(int port);
+
+int init_client_connection(int port, char *host, exception_s *exception);
 
 #endif //IMAQLIQTESTTASK_CONNECTION_H
