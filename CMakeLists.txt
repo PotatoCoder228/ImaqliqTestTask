@@ -5,6 +5,8 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(server
         src/server/main.c
+        src/server/app/server_app.c
+        src/server/app/server_app.h
         src/server/connection/connection_s.c
         include/server/connection_s.h
         src/common/containers/vector_s.c

@@ -24,7 +24,7 @@ static void exception_set_msg(exception_s *exception, char *string) {
     if (exception != NULL && string != NULL) {
         char *is_alloc = realloc(exception->msg, strlen(string) + 1);
         if (is_alloc) {
-            strcpy(string, exception->msg);
+            strcpy(exception->msg, string);
         }
     }
 }

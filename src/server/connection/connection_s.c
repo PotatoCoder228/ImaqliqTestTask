@@ -3,6 +3,7 @@
 //
 
 #include <stdbool.h>
+#include <syslog.h>
 #include "../../../include/server/connection_s.h"
 #include "../../../include/common/exception_s.h"
 
@@ -10,7 +11,7 @@
 int init_connection(int port, exception_s *exception) {
     int server_descr = socket(AF_INET, SOCK_STREAM, 0);
     if (server_descr == -1) {
-        throw_exception(exception, SOCKET_INIT_DENIED, "Не удалось создать сокет\n");
+        syslog(LOG_ERR, "Не удалось создать сокет\n");
         return EXIT_FAILURE;
     }
     //bind socket
@@ -24,13 +25,15 @@ int init_connection(int port, exception_s *exception) {
                       (struct sockaddr *) &addr, sizeof(addr));
     if (!result) {
         close(server_descr);
-        throw_exception(exception, SOCKET_BIND_DENIED, "Не удалось привязать адрес к сокету.\n");
+        syslog(LOG_ERR, "Не удалось привязать адрес к сокету.\n");
         return EXIT_FAILURE;
     }
     result = listen(server_descr, 10);
     if (result == -1) {
         close(server_descr);
-        throw_exception(exception, SOCKET_BIND_DENIED, "Не удалось создать очередь для прослушивания сокета.\n");
+        syslog(LOG_ERR, "Не удалось создать очередь для прослушивания сокета.\n");
         return EXIT_FAILURE;
     }
+    syslog(LOG_INFO, "Сокет успешно инициализирован");
+    return server_descr;
 }
