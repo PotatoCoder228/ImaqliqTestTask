@@ -19,13 +19,11 @@
 
 
 enum conn_consts {
-    CONNECTION_TIMEOUT = 128
+    CONNECTION_TIMEOUT = 30
 };
 
-static const char host[] = "localhost";
+bool server_connection(int port);
 
-int init_server_connection(int port);
-
-int init_client_connection(int port, char *host, exception_s *exception);
+bool client_connection(int port, char *host, char *buf, exception_s *exception);
 
 #endif //IMAQLIQTESTTASK_CONNECTION_H

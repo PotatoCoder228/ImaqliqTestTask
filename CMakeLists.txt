@@ -16,7 +16,10 @@ add_executable(server
         include/common/list_s.h include/common/cont-common.h
         include/common/containers.h
         src/common/exception/exception_s.c
-        include/common/exception_s.h)
+        include/common/exception_s.h
+        src/client/client_app.c
+        include/client/client_app.h
+        )
 
 add_executable(client
         src/client/main.c
@@ -30,4 +33,6 @@ add_executable(client
         include/common/list_s.h include/common/cont-common.h
         include/common/containers.h
         src/common/exception/exception_s.c
+        src/server/app/server_app.c
+        include/server/server_app.h
         include/common/exception_s.h src/client/client_app.c include/client/client_app.h)
