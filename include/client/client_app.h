@@ -6,13 +6,16 @@
 #define IMAQLIQTESTTASK_CLIENT_APP_H
 
 #include <stdint.h>
+#include "../common/exception_s.h"
 
 enum client_app_exceptions {
-    NOT_RESOLVE_HOST,
-    NOT_RESOLVE_SOCKET,
-    NOT_RESOLVE_CONNECT
+    HOST_ERROR = 0,
+    SOCKET_ERROR,
+    SENDING_ERROR
 };
 
 int client_start(char *host);
+
+void send_message(int socket, char *filename, exception_s *exception);
 
 #endif //IMAQLIQTESTTASK_CLIENT_APP_H

@@ -6,16 +6,17 @@
 #define IMAQLIQTESTTASK_SERVER_APP_H
 
 #include <stdint.h>
+#include "stdbool.h"
 #include "../common/exception_s.h"
 
 enum server_app_exceptions {
-    PORT_IS_OCCUPIED = 0,
-    ARGS_IS_UNDEFINED,
-    FORK_DENIED_EXCEPTION,
-    INVALID_PORT
+    ARGS_IS_UNDEFINED = 0,
+    FORK_DENIED_EXCEPTION
 };
 
 
-int server_start(int64_t port);
+void server_start(int64_t port);
+
+bool receive_file(int socket);
 
 #endif //IMAQLIQTESTTASK_SERVER_APP_H

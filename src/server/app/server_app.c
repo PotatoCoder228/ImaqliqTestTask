@@ -11,59 +11,84 @@
 sigset_t mask;
 
 int server_descr;
-bool is_working = true;
+FILE *file = NULL;
 
 static void *signal_handler(void *arg) {
     int err, signum;
     while (true) {
         err = sigwait(&mask, &signum);
         if (err != 0) {
-            syslog(LOG_ERR, "Ошибка вызова функции sigwait");
+            syslog(LOG_ERR, "sigwait() call error");
             close(server_descr);
+            closelog();
+            if (file != NULL) fclose(file);
             return (0);
         }
         switch (signum) {
             case SIGHUP:
-                syslog(LOG_INFO, "Завершение работы сервера после SIGHUP");
+                syslog(LOG_INFO, "Server shutdown after the SIGHUP");
                 close(server_descr);
+                closelog();
+                if (file != NULL) fclose(file);
                 exit(0);
             case SIGTERM:
-                syslog(LOG_INFO, "Завершение работы сервера SIGTERM");
+                syslog(LOG_INFO, "Server shutdown after the SIGTERM");
                 close(server_descr);
+                if (file != NULL) fclose(file);
+                closelog();
                 exit(0);
             default:
-                syslog(LOG_INFO, "Получен непредвиденный сигнал");
+                syslog(LOG_WARNING, "Undefined signal");
                 break;
         }
     }
 }
 
-int server_start(int64_t port) {
+bool receive_file(int socket) {
+    char filename[255];
+    time_t now = time(0);
+    sprintf(filename, "receive_file_%s.txt", ctime(&now));
+    file = fopen(filename, "wb");
+    if (file == NULL) {
+        syslog(LOG_ERR, "File creation error");
+        return false;
+    }
+    char request[240] = {0};
+    while (recv(socket, request, sizeof(request), 0) > 0) {
+        for (int i = 0; i < 240; i++) {
+            if (request[i] != '\0') {
+                fputc(request[i], file);
+            }
+        }
+        fflush(file);
+    }
+    fclose(file);
+    file = NULL;
+    syslog(LOG_INFO, "File %s is received", filename);
+    return true;
+}
+
+void server_start(int64_t port) {
+    openlog("server", LOG_PID, LOG_USER);
     int err;
     pthread_t handler_thread;
-    //сбрасываем действия по умолчанию и блокируем все сигналы
     struct sigaction sa;
     sa.sa_handler = SIG_DFL;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     if (sigaction(SIGHUP, &sa, NULL) < 0) {
-        syslog(LOG_ERR, "Не удалось сбросить действие SIGHUP");
+        syslog(LOG_ERR, "SIGHUP reset error");
     }
     sigfillset(&mask);
     if ((pthread_sigmask(SIG_BLOCK, &mask, NULL) != 0)) {
-        syslog(LOG_ERR, "Ошибка выполнения операции SIG_BLOCK");
+        syslog(LOG_ERR, "SIG_BLOCK execution error");
     }
     err = pthread_create(&handler_thread, NULL, signal_handler, 0);
     if (err != 0) {
-        syslog(LOG_ERR, "Невозможно создать поток.");
+        syslog(LOG_ERR, "Cannot make new thread");
     }
-    server_descr = init_server_connection((int) port);
-    FILE* new_file = fopen("sended_file","wb");
-    while (is_working) {
-        int accepted = accept(server_descr, NULL, NULL);//ожидаем запрос от клиента
-        if (accepted) {
-            do
-        }
+    int is_working = true;
+    while (is_working != false) {
+        is_working = server_connection((int) port);
     }
-    return EXIT_SUCCESS;
 }
