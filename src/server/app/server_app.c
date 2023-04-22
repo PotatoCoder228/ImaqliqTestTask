@@ -47,7 +47,8 @@ static void *signal_handler(void *arg) {
 bool receive_file(int socket) {
     char filename[255];
     time_t now = time(0);
-    sprintf(filename, "receive_file_%s.txt", ctime(&now));
+    char *data_str = ctime(&now);
+    sprintf(filename, "Client_file_%s.txt", strtok(data_str, "\r\n"));
     file = fopen(filename, "wb");
     if (file == NULL) {
         syslog(LOG_ERR, "File creation error");
@@ -69,7 +70,8 @@ bool receive_file(int socket) {
 }
 
 void server_start(int64_t port) {
-    openlog("server", LOG_PID, LOG_USER);
+    openlog("file-server", LOG_PID, LOG_DAEMON);
+    syslog(LOG_INFO, "Daemon server started");
     int err;
     pthread_t handler_thread;
     struct sigaction sa;

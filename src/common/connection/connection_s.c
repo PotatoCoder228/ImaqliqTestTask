@@ -40,7 +40,12 @@ bool server_connection(int port) {
         syslog(LOG_ERR, "Socket accepting error: %s", strerror(errno));
         return false;
     }
-    receive_file(new_sock);
+    if (!receive_file(new_sock)) {
+        syslog(LOG_ERR, "File is not received: %s", strerror(errno));
+        close(new_sock);
+        close(sock);
+        return false;
+    }
     close(new_sock);
     close(sock);
     return true;
