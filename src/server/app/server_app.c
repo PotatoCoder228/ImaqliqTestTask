@@ -77,7 +77,7 @@ bool receive_file(int socket) {
     if (file != NULL) {
         fflush(file);
         int closed = fclose(file);
-        if (!closed) {
+        if (closed != 0) {
             syslog(LOG_ERR, "File %s is not closed", filename);
             file = NULL;
             return false;
