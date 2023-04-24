@@ -41,7 +41,7 @@ bool server_connection(int port) {
         return false;
     }
     if (!receive_file(new_sock)) {
-        syslog(LOG_ERR, "File is not received: %s", strerror(errno));
+        syslog(LOG_ERR, "File not received: %s", strerror(errno));
         close(new_sock);
         close(sock);
         return false;
@@ -58,7 +58,7 @@ bool client_connection(int port, char *host, char *buf, exception_s *exception) 
 
     host_name = gethostbyname(host);
     if (host_name == (struct hostent *) 0) {
-        throw_exception(exception, HOST_ERROR, "Error of getting host");
+        throw_exception(exception, HOST_ERROR, "The error of getting host");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool client_connection(int port, char *host, char *buf, exception_s *exception) 
     server.sin_addr.s_addr = *((unsigned long *) host_name->h_addr);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        throw_exception(exception, SOCKET_ERROR, "Socket init error");
+        throw_exception(exception, SOCKET_ERROR, "The socket init error");
         return false;
     }
 
@@ -77,14 +77,13 @@ bool client_connection(int port, char *host, char *buf, exception_s *exception) 
         printf("Failed to connect, try again...\n");
         fflush(stdout);
         connected = connect(sock, (struct sockaddr *) &server, sizeof(server));
-        sleep(1);
+        sleep(3);
         time -= 10;
     }
     if (time < 1 && connected < 0) {
-        printf("Failed to connect, try again...\n");
+        printf("Cannot connect with a server...\n");
         return false;
     }
-
     send_message(sock, buf, exception);
     close(sock);
     return true;

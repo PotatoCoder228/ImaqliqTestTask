@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(ImaqliqTestTask C)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_FLAGS "-O2 -Wall -pthread")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -Wall -pthread -g")
 
 add_executable(server
         src/server/main.c
