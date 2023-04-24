@@ -48,24 +48,43 @@ bool receive_file(int socket) {
     char filename[255];
     time_t now = time(0);
     char *data_str = ctime(&now);
-    sprintf(filename, "Client_file_%s.txt", strtok(data_str, "\r\n"));
-    file = fopen(filename, "wb");
-    if (file == NULL) {
-        syslog(LOG_ERR, "File creation error");
+    if (data_str == NULL) {
+        syslog(LOG_ERR, "ctime() return NULL");
         return false;
     }
+    sprintf(filename, "Client_file_%s.txt", strtok(data_str, "\r\n"));
     char request[240] = {0};
-    while (recv(socket, request, sizeof(request), 0) > 0) {
+    size_t read = recv(socket, request, sizeof(request), 0);
+    while (read > 0) {
+        if (file == NULL) {
+            file = fopen(filename, "w");
+            if (file == NULL) {
+                syslog(LOG_ERR, "File creation error");
+                return false;
+            }
+        }
         for (int i = 0; i < 240; i++) {
             if (request[i] != '\0') {
                 fputc(request[i], file);
             }
         }
         fflush(file);
+        for (int i = 0; i < 240; i++) {
+            request[i] = 0;
+        }
+        read = recv(socket, request, sizeof(request), 0);
     }
-    fclose(file);
-    file = NULL;
-    syslog(LOG_INFO, "File %s is received", filename);
+    if (file != NULL) {
+        fflush(file);
+        int closed = fclose(file);
+        if (!closed) {
+            syslog(LOG_ERR, "File %s is not closed", filename);
+            file = NULL;
+            return false;
+        }
+        syslog(LOG_INFO, "File %s is received", filename);
+        file = NULL;
+    }
     return true;
 }
 

@@ -12,17 +12,22 @@
 #include "../../include/common/connection_s.h"
 
 void send_message(int socket, char *filename, exception_s *exception) {
-    FILE *file = fopen(filename, "rb");
+    FILE *file = NULL;
+    file = fopen(filename, "r");
     if (file == NULL) {
-        printf("%s", strerror(errno));
+        printf("%s\n", strerror(errno));
         return;
     }
-    char buffer[50] = {0};
     uint64_t b;
     while (!feof(file)) {
+        char buffer[240] = {0};
         b = fread(buffer, 1, sizeof(buffer), file);
         if (b > 0) send(socket, buffer, b, 0);
-        else throw_exception(exception, SENDING_ERROR, strerror(errno));
+        else {
+            throw_exception(exception, SENDING_ERROR, strerror(errno));
+            break;
+        }
+        fflush(file);
     }
     fclose(file);
     printf("The file was sent successfully\n");
@@ -31,10 +36,23 @@ void send_message(int socket, char *filename, exception_s *exception) {
 int client_start(char *host) {
     int64_t port;
     exception_s *exception = new_exception();
+    printf("Welcome to client application.\n");
+    printf("exit - application shutdown.\n");
     while (true) {
+        if (feof(stdin)) {
+            clearerr(stdin);
+        }
         char str_port[10];
         printf("Input port:");
         char *buf = fgets(str_port, 10, stdin);
+        if (buf == NULL) {
+            printf("You didn't enter port.\n");
+            continue;
+        } else if (strcmp(str_port, "exit\n") == 0) {
+            printf("Application shutdown...\n");
+            exception_destroy(exception);
+            return EXIT_SUCCESS;
+        }
         port = strtol(str_port, &buf, 10);
         if (port <= 1024 || port > 64000) {
             printf("Invalid port\n");
@@ -43,10 +61,18 @@ int client_start(char *host) {
         }
     }
     while (true) {
+        if (feof(stdin)) {
+            clearerr(stdin);
+        }
         printf("Input file:");
         char path[255];
         char *buf = fgets(path, 255, stdin);
+        if (buf == NULL) {
+            printf("You didn't input filename or \"exit\". Retry.\n");
+            continue;
+        }
         buf = strtok(buf, "\n\r");
+        (buf == NULL) ? buf = path : buf;
         if (strcmp(buf, "exit") == 0) {
             exception_destroy(exception);
             break;

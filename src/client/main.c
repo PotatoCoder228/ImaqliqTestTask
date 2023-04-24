@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         client_start(argv[1]);
     } else {
-        printf("Вы не передали в аргументе программы хост");
+        printf("You didn't input host in program args\n");
     }
     return 0;
 }

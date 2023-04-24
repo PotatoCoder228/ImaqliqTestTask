@@ -19,7 +19,7 @@ bool server_connection(int port) {
     int namelen;
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        syslog(LOG_ERR, "Socket init error: %s", strerror(errno));
+        syslog(LOG_ERR, "Socket init error: %s\n", strerror(errno));
         return false;
     }
     server.sin_family = AF_INET;
@@ -27,21 +27,21 @@ bool server_connection(int port) {
     server.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sock, (struct sockaddr *) &server, sizeof(server)) < 0) {
-        syslog(LOG_ERR, "Socket binding error:%s", strerror(errno));
+        syslog(LOG_ERR, "Socket binding error:%s\n", strerror(errno));
         return false;
     }
 
     if (listen(sock, 1) != 0) {
-        syslog(LOG_ERR, "Socket listening error: %s", strerror(errno));
+        syslog(LOG_ERR, "Socket listening error: %s\n", strerror(errno));
         return false;
     }
     namelen = sizeof(client);
     if ((new_sock = accept(sock, (struct sockaddr *) &client, (socklen_t *) (&namelen))) == -1) {
-        syslog(LOG_ERR, "Socket accepting error: %s", strerror(errno));
+        syslog(LOG_ERR, "Socket accepting error: %s\n", strerror(errno));
         return false;
     }
     if (!receive_file(new_sock)) {
-        syslog(LOG_ERR, "File not received: %s", strerror(errno));
+        syslog(LOG_ERR, "File not received: %s\n", strerror(errno));
         close(new_sock);
         close(sock);
         return false;
@@ -58,7 +58,7 @@ bool client_connection(int port, char *host, char *buf, exception_s *exception) 
 
     host_name = gethostbyname(host);
     if (host_name == (struct hostent *) 0) {
-        throw_exception(exception, HOST_ERROR, "The error of getting host");
+        throw_exception(exception, HOST_ERROR, "The error of getting host\n");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool client_connection(int port, char *host, char *buf, exception_s *exception) 
     server.sin_addr.s_addr = *((unsigned long *) host_name->h_addr);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        throw_exception(exception, SOCKET_ERROR, "The socket init error");
+        throw_exception(exception, SOCKET_ERROR, "The socket init error\n");
         return false;
     }
 

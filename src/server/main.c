@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     if (exception == NULL) {
         fprintf(stderr, "%s", strerror(errno));
     }
-    if (argc == 0) {
+    if (argc < 2) {
         throw_exception(exception, ARGS_IS_UNDEFINED, "Port not found.\n");
         exception_destroy(exception);
         return EXIT_FAILURE;
