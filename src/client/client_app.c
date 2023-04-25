@@ -25,13 +25,12 @@ void send_message(int socket, char *filename, exception_s *exception) {
         b = fread(buffer, 1, sizeof(buffer), file);
         if (b > 0) {
             pipe_error = send(socket, buffer, b, MSG_NOSIGNAL);
-            if(pipe_error == -1){
+            if (pipe_error == -1) {
                 throw_exception(exception, BREAK_PIPE_ERROR, strerror(errno));
                 fclose(file);
                 return;
             }
-        }
-        else {
+        } else {
             throw_exception(exception, SENDING_ERROR, strerror(errno));
             break;
         }
