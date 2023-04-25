@@ -10,7 +10,7 @@
 
 sigset_t mask;
 
-int server_descr;
+pthread_mutex_t mutex;
 FILE *file = NULL;
 
 static void *signal_handler(void *arg) {
@@ -18,25 +18,25 @@ static void *signal_handler(void *arg) {
     while (true) {
         err = sigwait(&mask, &signum);
         if (err != 0) {
+            pthread_mutex_lock(&mutex);
             syslog(LOG_ERR, "sigwait() call error");
-            close(server_descr);
             closelog();
             if (file != NULL) fclose(file);
-            return (0);
+            exit(EXIT_FAILURE);
         }
         switch (signum) {
             case SIGHUP:
+                pthread_mutex_lock(&mutex);
                 syslog(LOG_INFO, "Server shutdown after the SIGHUP");
-                close(server_descr);
                 closelog();
                 if (file != NULL) fclose(file);
-                exit(0);
+                exit(EXIT_SUCCESS);
             case SIGTERM:
+                pthread_mutex_lock(&mutex);
                 syslog(LOG_INFO, "Server shutdown after the SIGTERM");
-                close(server_descr);
                 if (file != NULL) fclose(file);
                 closelog();
-                exit(0);
+                exit(EXIT_SUCCESS);
             default:
                 syslog(LOG_WARNING, "Undefined signal");
                 break;
@@ -57,7 +57,9 @@ bool receive_file(int socket) {
     size_t read = recv(socket, request, sizeof(request), 0);
     while (read > 0) {
         if (file == NULL) {
+            pthread_mutex_lock(&mutex);
             file = fopen(filename, "w");
+            pthread_mutex_unlock(&mutex);
             if (file == NULL) {
                 syslog(LOG_ERR, "File creation error");
                 return false;
@@ -76,15 +78,16 @@ bool receive_file(int socket) {
     }
     if (file != NULL) {
         fflush(file);
+        pthread_mutex_lock(&mutex);
         int closed = fclose(file);
+        pthread_mutex_unlock(&mutex);
         if (closed != 0) {
             syslog(LOG_ERR, "File %s is not closed", filename);
-            file = NULL;
             return false;
         }
         syslog(LOG_INFO, "File %s is received", filename);
-        file = NULL;
     }
+    file = NULL;
     return true;
 }
 
