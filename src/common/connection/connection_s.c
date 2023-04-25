@@ -29,38 +29,32 @@ bool server_connection(int port) {
 
     if (bind(sock, (struct sockaddr *) &server, sizeof(server)) < 0) {
         syslog(LOG_ERR, "Socket binding error:%s\n", strerror(errno));
-        raise(SIGTERM);
         return false;
     }
 
     if (listen(sock, 1) != 0) {
         syslog(LOG_ERR, "Socket listening error: %s\n", strerror(errno));
-        raise(SIGTERM);
         return false;
     }
     namelen = sizeof(client);
     if ((new_sock = accept(sock, (struct sockaddr *) &client, (socklen_t *) (&namelen))) == -1) {
         syslog(LOG_ERR, "Socket accepting error: %s\n", strerror(errno));
-        raise(SIGTERM);
         return false;
     }
     if (!receive_file(new_sock)) {
         syslog(LOG_ERR, "File not received: %s\n", strerror(errno));
         close(new_sock);
         close(sock);
-        raise(SIGTERM);
         return false;
     }
     int closed = close(new_sock);
     if (closed != 0) {
         syslog(LOG_ERR, "Cannot close 'new_sock': %s\n", strerror(errno));
-        raise(SIGTERM);
         return false;
     }
     closed = close(sock);
     if (closed != 0) {
         syslog(LOG_ERR, "Cannot close 'sock': %s\n", strerror(errno));
-        raise(SIGTERM);
         return false;
     }
     return true;

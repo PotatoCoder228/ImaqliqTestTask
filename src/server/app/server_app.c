@@ -121,4 +121,5 @@ void server_start(int64_t port) {
     while (is_working != false) {
         is_working = server_connection((int) port);
     }
+    syslog(LOG_INFO, "Daemon server shutdown");
 }
