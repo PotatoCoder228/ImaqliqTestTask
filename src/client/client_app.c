@@ -18,11 +18,19 @@ void send_message(int socket, char *filename, exception_s *exception) {
         printf("%s\n", strerror(errno));
         return;
     }
-    uint64_t b;
+    size_t b;
+    ssize_t pipe_error;
     while (!feof(file)) {
         char buffer[240] = {0};
         b = fread(buffer, 1, sizeof(buffer), file);
-        if (b > 0) send(socket, buffer, b, 0);
+        if (b > 0) {
+            pipe_error = send(socket, buffer, b, MSG_NOSIGNAL);
+            if(pipe_error == -1){
+                throw_exception(exception, BREAK_PIPE_ERROR, strerror(errno));
+                fclose(file);
+                return;
+            }
+        }
         else {
             throw_exception(exception, SENDING_ERROR, strerror(errno));
             break;

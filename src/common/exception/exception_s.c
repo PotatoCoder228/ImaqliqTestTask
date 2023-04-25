@@ -55,7 +55,7 @@ void throw_exception(exception_s *exception, int code, char *message) {
     if (exception != NULL) {
         exception_set_msg(exception, message);
         exception_set_code(exception, code);
-        fprintf(stderr, "%s", exception->msg);
+        fprintf(stderr, "%s\n", exception->msg);
     }
 }
 

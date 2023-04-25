@@ -12,7 +12,7 @@ enum client_app_exceptions {
     HOST_ERROR = 0,
     SOCKET_ERROR,
     SENDING_ERROR,
-    NULL_PTR_ERROR
+    BREAK_PIPE_ERROR
 };
 
 int client_start(char *host);
