@@ -68,6 +68,8 @@ bool receive_file(int socket) {
         for (int i = 0; i < 240; i++) {
             if (request[i] != '\0') {
                 fputc(request[i], file);
+            } else {
+                break;
             }
         }
         fflush(file);
