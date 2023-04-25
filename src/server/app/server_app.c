@@ -67,20 +67,24 @@ bool receive_file(int socket) {
         }
         for (int i = 0; i < 240; i++) {
             if (request[i] != '\0') {
+                pthread_mutex_lock(&mutex);
                 fputc(request[i], file);
+                pthread_mutex_unlock(&mutex);
             } else {
                 break;
             }
         }
+        pthread_mutex_lock(&mutex);
         fflush(file);
+        pthread_mutex_unlock(&mutex);
         for (int i = 0; i < 240; i++) {
             request[i] = 0;
         }
         read = recv(socket, request, sizeof(request), 0);
     }
     if (file != NULL) {
-        fflush(file);
         pthread_mutex_lock(&mutex);
+        fflush(file);
         int closed = fclose(file);
         pthread_mutex_unlock(&mutex);
         if (closed != 0) {
